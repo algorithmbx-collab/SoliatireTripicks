@@ -123,15 +123,33 @@ namespace SolitaireTripicks.Cards
             return false;
         }
 
+        public void MarkCardRemoved(CardView cardView)
+        {
+            foreach (var kvp in spawnedCards)
+            {
+                if (kvp.Value.View == cardView)
+                {
+                    kvp.Value.IsRemoved = true;
+                    if (kvp.Value.View != null)
+                    {
+                        kvp.Value.View.gameObject.SetActive(false);
+                    }
+
+                    UpdateUnblockedStates();
+                    break;
+                }
+            }
+        }
+
         public void UpdateUnblockedStates()
         {
             foreach (var kvp in spawnedCards)
             {
-                kvp.Value.IsUnblocked = AreBlockersFaceUp(kvp.Value.Node);
+                kvp.Value.IsUnblocked = AreBlockersCleared(kvp.Value.Node);
             }
         }
 
-        private bool AreBlockersFaceUp(LayoutDefinition.LayoutNode node)
+        private bool AreBlockersCleared(LayoutDefinition.LayoutNode node)
         {
             var blockers = node.BlockedBy;
             if (blockers == null || blockers.Count == 0)
@@ -146,7 +164,7 @@ namespace SolitaireTripicks.Cards
                     continue;
                 }
 
-                if (!spawned.View.IsFaceUp)
+                if (!spawned.IsRemoved)
                 {
                     return false;
                 }
@@ -237,12 +255,15 @@ namespace SolitaireTripicks.Cards
 
             public CardView View { get; }
 
+            public bool IsRemoved { get; set; }
+
             public bool IsUnblocked { get; set; }
 
             public SpawnedCard(LayoutDefinition.LayoutNode node, CardView view)
             {
                 Node = node;
                 View = view;
+                IsRemoved = false;
             }
         }
     }

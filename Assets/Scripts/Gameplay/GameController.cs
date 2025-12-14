@@ -186,6 +186,7 @@ namespace SolitaireTripicks.Cards
             }
 
             tableau.Remove(card);
+            layoutSpawner?.MarkCardRemoved(card);
             card.SetFaceUp(true);
             wasteTopCard = card.CardData;
             UpdateWastePileView();
