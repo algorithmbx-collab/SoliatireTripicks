@@ -21,6 +21,13 @@ namespace SolitaireTripicks.Cards
 
         public event Action GameLost;
 
+        [Header("Effects")]
+        [SerializeField]
+        private ParticleSystem playParticlePrefab;
+
+        [SerializeField]
+        private ParticleSystem winBurstPrefab;
+
         [SerializeField]
         private LayoutSpawner layoutSpawner;
 
@@ -33,6 +40,7 @@ namespace SolitaireTripicks.Cards
         private CardData wasteTopCard;
         private Deck deck;
         private bool isPaused;
+        private bool hasEnded;
         private int streak;
         private int score;
 
@@ -67,6 +75,8 @@ namespace SolitaireTripicks.Cards
 
             if (!TryPlayCard(card))
             {
+                AudioManager.Instance?.PlayInvalidMove();
+
                 if (!HasPlayableMove())
                 {
                     DrawFromStockToWaste();
@@ -142,6 +152,7 @@ namespace SolitaireTripicks.Cards
             streak = 0;
             score = 0;
             isPaused = false;
+            hasEnded = false;
 
             deck = Deck.FromResources();
             deck.Shuffle();
@@ -179,6 +190,10 @@ namespace SolitaireTripicks.Cards
             wasteTopCard = card.CardData;
             UpdateWastePileView();
 
+            SpawnParticle(playParticlePrefab, card.transform.position);
+            card.PlayValidPlayFeedback();
+            AudioManager.Instance?.PlayPlay();
+
             streak++;
             score += streak;
             StreakChanged?.Invoke(streak);
@@ -188,7 +203,7 @@ namespace SolitaireTripicks.Cards
 
             if (tableau.Count == 0)
             {
-                GameWon?.Invoke();
+                TriggerWin();
             }
             else if (!HasPlayableMove())
             {
@@ -258,6 +273,8 @@ namespace SolitaireTripicks.Cards
             UpdateWastePileView();
             StockCountChanged?.Invoke(stockPile.Count);
             ResetStreak();
+
+            AudioManager.Instance?.PlayDraw();
         }
 
         private void ResetStreak()
@@ -270,15 +287,13 @@ namespace SolitaireTripicks.Cards
         {
             if (tableau.Count == 0)
             {
-                isPaused = true;
-                GameWon?.Invoke();
+                TriggerWin();
                 return;
             }
 
             if (stockPile.Count == 0 && !HasPlayableMove())
             {
-                isPaused = true;
-                GameLost?.Invoke();
+                TriggerLoss();
             }
         }
 
@@ -291,6 +306,51 @@ namespace SolitaireTripicks.Cards
 
             WasteCardChanged?.Invoke(wasteTopCard);
         }
+
+        private void TriggerWin()
+        {
+            if (hasEnded)
+            {
+                return;
+            }
+
+            hasEnded = true;
+            isPaused = true;
+            AudioManager.Instance?.PlayWin();
+            SpawnParticle(winBurstPrefab, wastePileView != null ? wastePileView.transform.position : Vector3.zero);
+            GameWon?.Invoke();
+        }
+
+        private void TriggerLoss()
+        {
+            if (hasEnded)
+            {
+                return;
+            }
+
+            hasEnded = true;
+            isPaused = true;
+            AudioManager.Instance?.PlayLose();
+            GameLost?.Invoke();
+        }
+
+        private void SpawnParticle(ParticleSystem prefab, Vector3 position)
+        {
+            if (prefab == null)
+            {
+                return;
+            }
+
+            var instance = Instantiate(prefab, position, Quaternion.identity);
+            if (instance == null)
+            {
+                return;
+            }
+
+            instance.Play();
+            var main = instance.main;
+            var lifetime = main.duration + main.startLifetime.constantMax;
+            Destroy(instance.gameObject, lifetime);
+        }
     }
-}
 }
