@@ -27,14 +27,21 @@ namespace SolitaireTripicks.Cards
         [SerializeField]
         private bool spawnOnStart = true;
 
-        private readonly Dictionary<string, SpawnedCard> spawnedCards = new();
+        [SerializeField]
+        [Tooltip("Optional override. If not set, the spawner will search for a GameController to wire card interactions.")]
+        private GameController gameController;
+
+        private readonly List<SpawnedCard> spawnedCards = new();
+        private readonly Dictionary<string, SpawnedCard> spawnedCardsById = new();
 
         public int NodeCount => layoutDefinition != null ? layoutDefinition.Nodes.Count : 0;
 
-        public IEnumerable<CardView> SpawnedCards => spawnedCards.Values.Select(spawned => spawned.View);
+        public IEnumerable<CardView> SpawnedCards => spawnedCards.Select(spawned => spawned.View);
 
         private void Start()
         {
+            ResolveGameController();
+
             if (spawnOnStart)
             {
                 Spawn(initialCards);
@@ -69,9 +76,20 @@ namespace SolitaireTripicks.Cards
 
                 view.SetCard(cardData, false, true);
 
+                var interaction = view.GetComponent<CardInteraction>();
+                if (interaction == null)
+                {
+                    interaction = view.gameObject.AddComponent<CardInteraction>();
+                }
+
+                interaction.Initialize(view, ResolveGameController());
+
+                var spawnedCard = new SpawnedCard(node, view);
+                spawnedCards.Add(spawnedCard);
+
                 if (!string.IsNullOrWhiteSpace(node.CardId))
                 {
-                    spawnedCards[node.CardId] = new SpawnedCard(node, view);
+                    spawnedCardsById[node.CardId] = spawnedCard;
                 }
             }
 
@@ -80,7 +98,7 @@ namespace SolitaireTripicks.Cards
 
         public bool TryGetCard(string cardId, out CardView cardView)
         {
-            if (spawnedCards.TryGetValue(cardId, out var spawned))
+            if (spawnedCardsById.TryGetValue(cardId, out var spawned))
             {
                 cardView = spawned.View;
                 return true;
@@ -92,12 +110,12 @@ namespace SolitaireTripicks.Cards
 
         public bool IsCardUnblocked(string cardId)
         {
-            return spawnedCards.TryGetValue(cardId, out var spawned) && spawned.IsUnblocked;
+            return spawnedCardsById.TryGetValue(cardId, out var spawned) && spawned.IsUnblocked;
         }
 
         public bool IsCardUnblocked(CardView cardView)
         {
-            foreach (var spawned in spawnedCards.Values)
+            foreach (var spawned in spawnedCards)
             {
                 if (spawned.View == cardView)
                 {
@@ -110,7 +128,7 @@ namespace SolitaireTripicks.Cards
 
         public bool TryGetNode(CardView cardView, out LayoutDefinition.LayoutNode node)
         {
-            foreach (var spawned in spawnedCards.Values)
+            foreach (var spawned in spawnedCards)
             {
                 if (spawned.View == cardView)
                 {
@@ -123,15 +141,33 @@ namespace SolitaireTripicks.Cards
             return false;
         }
 
-        public void UpdateUnblockedStates()
+        public void MarkCardRemoved(CardView cardView)
         {
-            foreach (var kvp in spawnedCards)
+            foreach (var spawned in spawnedCards)
             {
-                kvp.Value.IsUnblocked = AreBlockersFaceUp(kvp.Value.Node);
+                if (spawned.View == cardView)
+                {
+                    spawned.IsRemoved = true;
+                    if (spawned.View != null)
+                    {
+                        spawned.View.gameObject.SetActive(false);
+                    }
+
+                    UpdateUnblockedStates();
+                    break;
+                }
             }
         }
 
-        private bool AreBlockersFaceUp(LayoutDefinition.LayoutNode node)
+        public void UpdateUnblockedStates()
+        {
+            foreach (var spawned in spawnedCards)
+            {
+                spawned.IsUnblocked = !spawned.IsRemoved && AreBlockersCleared(spawned.Node);
+            }
+        }
+
+        private bool AreBlockersCleared(LayoutDefinition.LayoutNode node)
         {
             var blockers = node.BlockedBy;
             if (blockers == null || blockers.Count == 0)
@@ -141,12 +177,12 @@ namespace SolitaireTripicks.Cards
 
             foreach (var blockerId in blockers)
             {
-                if (!spawnedCards.TryGetValue(blockerId, out var spawned))
+                if (!spawnedCardsById.TryGetValue(blockerId, out var spawned))
                 {
                     continue;
                 }
 
-                if (!spawned.View.IsFaceUp)
+                if (!spawned.IsRemoved)
                 {
                     return false;
                 }
@@ -157,7 +193,7 @@ namespace SolitaireTripicks.Cards
 
         private void ClearSpawnedCards()
         {
-            foreach (var spawned in spawnedCards.Values)
+            foreach (var spawned in spawnedCards)
             {
                 if (spawned?.View != null)
                 {
@@ -171,8 +207,18 @@ namespace SolitaireTripicks.Cards
                     }
                 }
             }
-
             spawnedCards.Clear();
+            spawnedCardsById.Clear();
+        }
+
+        private GameController ResolveGameController()
+        {
+            if (gameController == null)
+            {
+                gameController = FindObjectOfType<GameController>();
+            }
+
+            return gameController;
         }
 
         private void OnDrawGizmos()
@@ -237,12 +283,15 @@ namespace SolitaireTripicks.Cards
 
             public CardView View { get; }
 
+            public bool IsRemoved { get; set; }
+
             public bool IsUnblocked { get; set; }
 
             public SpawnedCard(LayoutDefinition.LayoutNode node, CardView view)
             {
                 Node = node;
                 View = view;
+                IsRemoved = false;
             }
         }
     }

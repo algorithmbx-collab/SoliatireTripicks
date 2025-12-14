@@ -13,6 +13,12 @@ namespace SolitaireTripicks.Cards
         [SerializeField]
         private GameController gameController;
 
+        public void Initialize(CardView view, GameController controller)
+        {
+            cardView = view;
+            gameController = controller;
+        }
+
         private void Awake()
         {
             if (cardView == null)
