@@ -49,5 +49,13 @@ namespace SolitaireTripicks.Cards
         public Sprite FaceSprite => faceSprite;
 
         public Sprite BackSprite => backSprite;
+
+        public void Initialize(Rank newRank, Suit newSuit, Sprite face = null, Sprite back = null)
+        {
+            rank = newRank;
+            suit = newSuit;
+            faceSprite = face;
+            backSprite = back;
+        }
     }
 }

@@ -29,6 +29,13 @@ namespace SolitaireTripicks.Cards
         [SerializeField]
         private bool startFaceUp;
 
+        [Header("Overlay")]
+        [SerializeField]
+        private TextMesh label;
+
+        [SerializeField]
+        private bool createLabelIfMissing = true;
+
         [Header("Feedback")]
         [SerializeField]
         [Range(1f, 1.5f)]
@@ -41,6 +48,9 @@ namespace SolitaireTripicks.Cards
         public CardData CardData { get; private set; }
 
         public bool IsFaceUp => isFaceUp;
+
+        private static Sprite fallbackFaceSprite;
+        private static Sprite fallbackBackSprite;
 
         private bool isFaceUp;
         private Coroutine flipRoutine;
@@ -61,6 +71,8 @@ namespace SolitaireTripicks.Cards
             {
                 originalBackColor = backRenderer.color;
             }
+
+            EnsureLabelExists();
 
             if (startFaceUp)
             {
@@ -91,14 +103,15 @@ namespace SolitaireTripicks.Cards
 
             if (frontRenderer != null)
             {
-                frontRenderer.sprite = data != null ? data.FaceSprite : null;
+                frontRenderer.sprite = data != null && data.FaceSprite != null ? data.FaceSprite : GetFallbackFaceSprite();
             }
 
             if (backRenderer != null)
             {
-                backRenderer.sprite = data != null ? data.BackSprite : null;
+                backRenderer.sprite = data != null && data.BackSprite != null ? data.BackSprite : GetFallbackBackSprite();
             }
 
+            UpdateLabel(CardData);
             SetFaceUp(faceUp, instant);
         }
 
@@ -227,6 +240,11 @@ namespace SolitaireTripicks.Cards
             {
                 backRenderer.enabled = !faceUp;
             }
+
+            if (label != null)
+            {
+                label.gameObject.SetActive(faceUp);
+            }
         }
 
         private void SetHorizontalScale(float value)
@@ -244,6 +262,123 @@ namespace SolitaireTripicks.Cards
         private void OnMouseExit()
         {
             transform.localScale = originalScale;
+        }
+
+        private void EnsureLabelExists()
+        {
+            if (label != null || !createLabelIfMissing)
+            {
+                return;
+            }
+
+            var labelObject = new GameObject("CardLabel");
+            labelObject.transform.SetParent(transform);
+            labelObject.transform.localPosition = new Vector3(0f, 0f, -0.02f);
+            labelObject.transform.localRotation = Quaternion.identity;
+            labelObject.transform.localScale = Vector3.one * 0.015f;
+
+            label = labelObject.AddComponent<TextMesh>();
+            label.anchor = TextAnchor.MiddleCenter;
+            label.alignment = TextAlignment.Center;
+            label.characterSize = 1f;
+            label.fontSize = 80;
+            label.text = string.Empty;
+
+            var meshRenderer = label.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+            {
+                var sortingLayerId = frontRenderer != null ? frontRenderer.sortingLayerID : 0;
+                var sortingOrder = frontRenderer != null ? frontRenderer.sortingOrder + 2 : 2;
+                meshRenderer.sortingLayerID = sortingLayerId;
+                meshRenderer.sortingOrder = sortingOrder;
+            }
+        }
+
+        private void UpdateLabel(CardData data)
+        {
+            if (label == null)
+            {
+                return;
+            }
+
+            if (data == null)
+            {
+                label.text = string.Empty;
+                return;
+            }
+
+            label.text = $"{GetRankString(data.Rank)}{GetSuitSymbol(data.Suit)}";
+            label.color = data.Suit == Suit.Hearts || data.Suit == Suit.Diamonds ? new Color(0.82f, 0.1f, 0.16f) : Color.black;
+        }
+
+        private static string GetRankString(Rank rank)
+        {
+            return rank switch
+            {
+                Rank.Ace => "A",
+                Rank.Jack => "J",
+                Rank.Queen => "Q",
+                Rank.King => "K",
+                _ => ((int)rank).ToString()
+            };
+        }
+
+        private static string GetSuitSymbol(Suit suit)
+        {
+            return suit switch
+            {
+                Suit.Clubs => "♣",
+                Suit.Diamonds => "♦",
+                Suit.Hearts => "♥",
+                Suit.Spades => "♠",
+                _ => "?"
+            };
+        }
+
+        private static Sprite GetFallbackFaceSprite()
+        {
+            if (fallbackFaceSprite != null)
+            {
+                return fallbackFaceSprite;
+            }
+
+            fallbackFaceSprite = CreateSpriteWithBorder(new Color(0.95f, 0.95f, 0.94f), new Color(0.8f, 0.8f, 0.82f));
+            return fallbackFaceSprite;
+        }
+
+        private static Sprite GetFallbackBackSprite()
+        {
+            if (fallbackBackSprite != null)
+            {
+                return fallbackBackSprite;
+            }
+
+            fallbackBackSprite = CreateSpriteWithBorder(new Color(0.14f, 0.35f, 0.64f), new Color(0.08f, 0.2f, 0.42f));
+            return fallbackBackSprite;
+        }
+
+        private static Sprite CreateSpriteWithBorder(Color fillColor, Color borderColor)
+        {
+            const int width = 256;
+            const int height = 360;
+            const int border = 10;
+
+            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false)
+            {
+                name = "GeneratedCardSprite"
+            };
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var isBorder = x < border || x >= width - border || y < border || y >= height - border;
+                    texture.SetPixel(x, y, isBorder ? borderColor : fillColor);
+                }
+            }
+
+            texture.Apply();
+            return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 100f);
         }
     }
 }

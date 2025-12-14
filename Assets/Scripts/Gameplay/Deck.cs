@@ -26,13 +26,15 @@ namespace SolitaireTripicks.Cards
         public static Deck FromResources(int? seed = null)
         {
             var loadedCards = Resources.LoadAll<CardData>("Cards");
-
-            if (loadedCards == null || loadedCards.Length == 0)
+            var hasCards = loadedCards != null && loadedCards.Length > 0;
+            if (hasCards && CardCollectionValidator.ValidateCompleteSet(loadedCards, out _))
             {
-                throw new InvalidOperationException("No card assets found at Resources/Cards.");
+                return new Deck(loadedCards, seed);
             }
 
-            return new Deck(loadedCards, seed);
+            Debug.LogWarning("Card assets are missing or incomplete in Resources/Cards. Generating a fallback deck at runtime.");
+            var generatedCards = GenerateFullDeck();
+            return new Deck(generatedCards, seed);
         }
 
         public int Count => cards.Count;
@@ -76,6 +78,23 @@ namespace SolitaireTripicks.Cards
                 int j = random.Next(i + 1);
                 (cards[i], cards[j]) = (cards[j], cards[i]);
             }
+        }
+
+        private static IEnumerable<CardData> GenerateFullDeck()
+        {
+            var generated = new List<CardData>(52);
+            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
+            {
+                foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+                {
+                    var card = ScriptableObject.CreateInstance<CardData>();
+                    card.name = $"{rank} of {suit}";
+                    card.Initialize(rank, suit);
+                    generated.Add(card);
+                }
+            }
+
+            return generated;
         }
     }
 
