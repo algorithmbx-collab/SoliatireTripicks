@@ -54,6 +54,14 @@ namespace SolitaireTripicks.Cards
 
         public int Streak => streak;
 
+        private void Awake()
+        {
+            if (layoutSpawner == null)
+            {
+                layoutSpawner = FindObjectOfType<LayoutSpawner>();
+            }
+        }
+
         private void Start()
         {
             StartNewGame();
@@ -156,6 +164,11 @@ namespace SolitaireTripicks.Cards
 
             deck = Deck.FromResources();
             deck.Shuffle();
+
+            if (layoutSpawner == null)
+            {
+                Debug.LogWarning("GameController is missing a LayoutSpawner reference; tableau cards will not be spawned.", this);
+            }
 
             var tableauCount = layoutSpawner != null ? layoutSpawner.NodeCount : 0;
             var tableauCards = tableauCount > 0 ? deck.DrawMany(tableauCount).ToList() : new List<CardData>();
