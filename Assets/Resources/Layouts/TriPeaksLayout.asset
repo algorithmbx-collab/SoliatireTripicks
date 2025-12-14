@@ -1,0 +1,136 @@
+%YAML 1.1
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e7b939d8694f38a16fed0308aac7bb, type: 3}
+  m_Name: TriPeaksLayout
+  m_EditorClassIdentifier:
+  nodes:
+  - cardId: C0
+    position: {x: 2, y: 3}
+    blockedBy: []
+  - cardId: C1
+    position: {x: 5, y: 3}
+    blockedBy: []
+  - cardId: C2
+    position: {x: 8, y: 3}
+    blockedBy: []
+  - cardId: C3
+    position: {x: 1, y: 2}
+    blockedBy:
+    - C0
+  - cardId: C4
+    position: {x: 3, y: 2}
+    blockedBy:
+    - C0
+  - cardId: C5
+    position: {x: 4, y: 2}
+    blockedBy:
+    - C1
+  - cardId: C6
+    position: {x: 6, y: 2}
+    blockedBy:
+    - C1
+  - cardId: C7
+    position: {x: 7, y: 2}
+    blockedBy:
+    - C2
+  - cardId: C8
+    position: {x: 9, y: 2}
+    blockedBy:
+    - C2
+  - cardId: C9
+    position: {x: 0.5, y: 1}
+    blockedBy:
+    - C3
+  - cardId: C10
+    position: {x: 1.5, y: 1}
+    blockedBy:
+    - C3
+    - C4
+  - cardId: C11
+    position: {x: 2.5, y: 1}
+    blockedBy:
+    - C4
+  - cardId: C12
+    position: {x: 3.5, y: 1}
+    blockedBy:
+    - C4
+    - C5
+  - cardId: C13
+    position: {x: 4.5, y: 1}
+    blockedBy:
+    - C5
+    - C6
+  - cardId: C14
+    position: {x: 5.5, y: 1}
+    blockedBy:
+    - C6
+  - cardId: C15
+    position: {x: 6.5, y: 1}
+    blockedBy:
+    - C6
+    - C7
+  - cardId: C16
+    position: {x: 7.5, y: 1}
+    blockedBy:
+    - C7
+    - C8
+  - cardId: C17
+    position: {x: 8.5, y: 1}
+    blockedBy:
+    - C8
+  - cardId: C18
+    position: {x: 0, y: 0}
+    blockedBy:
+    - C9
+  - cardId: C19
+    position: {x: 1, y: 0}
+    blockedBy:
+    - C9
+    - C10
+  - cardId: C20
+    position: {x: 2, y: 0}
+    blockedBy:
+    - C10
+    - C11
+  - cardId: C21
+    position: {x: 3, y: 0}
+    blockedBy:
+    - C11
+    - C12
+  - cardId: C22
+    position: {x: 4, y: 0}
+    blockedBy:
+    - C12
+    - C13
+  - cardId: C23
+    position: {x: 5, y: 0}
+    blockedBy:
+    - C13
+    - C14
+  - cardId: C24
+    position: {x: 6, y: 0}
+    blockedBy:
+    - C14
+    - C15
+  - cardId: C25
+    position: {x: 7, y: 0}
+    blockedBy:
+    - C15
+    - C16
+  - cardId: C26
+    position: {x: 8, y: 0}
+    blockedBy:
+    - C16
+    - C17
+  - cardId: C27
+    position: {x: 9, y: 0}
+    blockedBy:
+    - C17
