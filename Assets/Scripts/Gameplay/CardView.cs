@@ -29,12 +29,22 @@ namespace SolitaireTripicks.Cards
         [SerializeField]
         private bool startFaceUp;
 
+        [Header("Feedback")]
+        [SerializeField]
+        [Range(1f, 1.5f)]
+        private float validPlayScale = 1.1f;
+
+        [SerializeField]
+        [Min(0f)]
+        private float validPlayDuration = 0.18f;
+
         public CardData CardData { get; private set; }
 
         public bool IsFaceUp => isFaceUp;
 
         private bool isFaceUp;
         private Coroutine flipRoutine;
+        private Coroutine pulseRoutine;
         private Vector3 originalScale;
         private Color? originalFrontColor;
         private Color? originalBackColor;
@@ -68,6 +78,11 @@ namespace SolitaireTripicks.Cards
             {
                 StopCoroutine(flipRoutine);
             }
+
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+            }
         }
 
         public void SetCard(CardData data, bool faceUp = false, bool instant = true)
@@ -89,6 +104,8 @@ namespace SolitaireTripicks.Cards
 
         public void SetFaceUp(bool faceUp, bool instant = false)
         {
+            var wasFaceUp = isFaceUp;
+
             if (isFaceUp == faceUp && flipRoutine == null)
             {
                 return;
@@ -103,10 +120,15 @@ namespace SolitaireTripicks.Cards
             if (instant || flipDuration <= 0f)
             {
                 ApplyFaceState(faceUp);
+                if (!wasFaceUp && faceUp)
+                {
+                    AudioManager.Instance?.PlayFlip();
+                }
+
                 return;
             }
 
-            flipRoutine = StartCoroutine(FlipRoutine(faceUp));
+            flipRoutine = StartCoroutine(FlipRoutine(faceUp, wasFaceUp));
         }
 
         public void SetSelected(bool selected)
@@ -132,7 +154,17 @@ namespace SolitaireTripicks.Cards
             }
         }
 
-        private IEnumerator FlipRoutine(bool faceUp)
+        public void PlayValidPlayFeedback()
+        {
+            if (pulseRoutine != null)
+            {
+                StopCoroutine(pulseRoutine);
+            }
+
+            pulseRoutine = StartCoroutine(ValidPlayPulse());
+        }
+
+        private IEnumerator FlipRoutine(bool faceUp, bool wasFaceUp)
         {
             var halfDuration = Mathf.Max(0.01f, flipDuration * 0.5f);
             var elapsed = 0f;
@@ -147,6 +179,10 @@ namespace SolitaireTripicks.Cards
 
             SetHorizontalScale(0f);
             ApplyFaceState(faceUp);
+            if (!wasFaceUp && faceUp)
+            {
+                AudioManager.Instance?.PlayFlip();
+            }
 
             elapsed = 0f;
             while (elapsed < halfDuration)
@@ -159,6 +195,23 @@ namespace SolitaireTripicks.Cards
 
             SetHorizontalScale(1f);
             flipRoutine = null;
+        }
+
+        private IEnumerator ValidPlayPulse()
+        {
+            var elapsed = 0f;
+            var duration = Mathf.Max(0.01f, validPlayDuration);
+            while (elapsed < duration)
+            {
+                var t = elapsed / duration;
+                var scale = Mathf.Lerp(validPlayScale, 1f, t * t);
+                transform.localScale = originalScale * scale;
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.localScale = originalScale;
+            pulseRoutine = null;
         }
 
         private void ApplyFaceState(bool faceUp)
