@@ -36,6 +36,11 @@ namespace SolitaireTripicks.Cards
 
         private void Start()
         {
+            if (gameController == null)
+            {
+                gameController = FindObjectOfType<GameController>();
+            }
+
             if (spawnOnStart)
             {
                 Spawn(initialCards);

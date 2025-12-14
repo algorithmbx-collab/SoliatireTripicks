@@ -58,9 +58,12 @@ namespace SolitaireTripicks.Cards
         private Vector3 originalScale;
         private Color? originalFrontColor;
         private Color? originalBackColor;
+        private BoxCollider2D boxCollider;
 
         private void Awake()
         {
+            EnsureRenderers();
+            EnsureCollider();
             originalScale = transform.localScale;
             if (frontRenderer != null)
             {
