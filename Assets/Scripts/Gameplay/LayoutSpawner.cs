@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SolitaireTripicks.Cards
@@ -27,6 +28,10 @@ namespace SolitaireTripicks.Cards
         private bool spawnOnStart = true;
 
         private readonly Dictionary<string, SpawnedCard> spawnedCards = new();
+
+        public int NodeCount => layoutDefinition != null ? layoutDefinition.Nodes.Count : 0;
+
+        public IEnumerable<CardView> SpawnedCards => spawnedCards.Values.Select(spawned => spawned.View);
 
         private void Start()
         {
@@ -88,6 +93,34 @@ namespace SolitaireTripicks.Cards
         public bool IsCardUnblocked(string cardId)
         {
             return spawnedCards.TryGetValue(cardId, out var spawned) && spawned.IsUnblocked;
+        }
+
+        public bool IsCardUnblocked(CardView cardView)
+        {
+            foreach (var spawned in spawnedCards.Values)
+            {
+                if (spawned.View == cardView)
+                {
+                    return spawned.IsUnblocked;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryGetNode(CardView cardView, out LayoutDefinition.LayoutNode node)
+        {
+            foreach (var spawned in spawnedCards.Values)
+            {
+                if (spawned.View == cardView)
+                {
+                    node = spawned.Node;
+                    return true;
+                }
+            }
+
+            node = null;
+            return false;
         }
 
         public void UpdateUnblockedStates()
