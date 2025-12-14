@@ -12,7 +12,7 @@ namespace SolitaireTripicks.Editor
         [InitializeOnLoadMethod]
         private static void ValidateOnLoad()
         {
-            EditorApplication.delayCall += ValidateAndLog;
+            EditorApplication.delayCall += () => ValidateAndLog();
         }
 
         [MenuItem("Tools/Cards/Validate Deck Assets")]
