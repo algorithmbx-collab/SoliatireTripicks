@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16d9b0527b1c3f148bd28f52c5a69c64, type: 3}
+  m_Name: UniversalRenderer
+  m_EditorClassIdentifier: 
+  m_RendererFeatures: []
+  m_RendererFeatureMap: {}
+  postProcessData: {fileID: 11400000, guid: e1b829bd2df826b43a6ef1e8b3b7bd6c, type: 2}
+  shaders:
+    m_LitShader: {fileID: 4800000, guid: 4f2e2f1d3c164a647a9ad54bdae06c4c, type: 3}
+    m_LitAutodeskInteractiveShader: {fileID: 4800000, guid: 05f5b9be1ecb88c4189ea0f70f95c76f, type: 3}
+    m_LitAutodeskInteractiveTransparentShader: {fileID: 4800000, guid: 7b4b0d13a0c14f648a14716843f06bd0, type: 3}
+    m_LitAutodeskInteractiveMaskedShader: {fileID: 4800000, guid: 333a2e2549aa2d1408d209b26d5f1d0d, type: 3}
+    m_SimpleLitShader: {fileID: 4800000, guid: 5b48e2e4db7c4e44bbba63a6f7e3d88d, type: 3}
+    m_UnlitShader: {fileID: 4800000, guid: 9ac4b88a0c7ab8c468b52a8b8e0a3c4f, type: 3}
+    m_FallbackErrorShader: {fileID: 4800000, guid: e6e9a6f30e33b90438a9d7c69e03084c, type: 3}
+    m_TerrainDetailLitShader: {fileID: 4800000, guid: 9e00a5c3e17d7d847b1dc8b3f5175a9d, type: 3}
+    m_TerrainDetailGrassShader: {fileID: 4800000, guid: 51d11c8a6de846dd99e5e0b11dcecc3c, type: 3}
+    m_TerrainDetailGrassBillboardShader: {fileID: 4800000, guid: 8c7a24ad602cec04d801e3a30e174f9a, type: 3}
+    m_Default2DShader: {fileID: 4800000, guid: f95f2593d9b1b8e4ebae459abfa9f23e, type: 3}
+    m_DefaultShader: {fileID: 4800000, guid: 0000000000000000f000000000000000, type: 0}
+  m_UseNativeRenderPass: 1
+  m_TransparencySortMode: 0
+  m_TransparencySortAxis: {x: 0, y: 0, z: 1}
+  m_DefaultMaterialType: 0
+  m_DefaultCustomMaterial: {fileID: 0}
+  m_DefaultLitMaterial: {fileID: 2100000, guid: 4f2e2f1d3c164a647a9ad54bdae06c4c, type: 2}
+  m_DefaultUnlitMaterial: {fileID: 2100000, guid: 9ac4b88a0c7ab8c468b52a8b8e0a3c4f, type: 2}
+  m_DefaultLineMaterial: {fileID: 2100000, guid: 0f4a043fdf2e4f3f8e52663b0e0e3d45, type: 2}
+  m_DefaultSpriteMaterial: {fileID: 2100000, guid: f95f2593d9b1b8e4ebae459abfa9f23e, type: 2}
+  m_Default2DMaskMaterial: {fileID: 2100000, guid: 4553e3c1571bc5d4c99c55c7c1b76dc1, type: 2}
+  m_DefaultTerrainMaterial: {fileID: 2100000, guid: 9e00a5c3e17d7d847b1dc8b3f5175a9d, type: 2}
+  m_DefaultDecalMaterial: {fileID: 2100000, guid: 54a278e6f74c4988a8e8d11af7c9a43a, type: 2}
+  m_DebugMaterial: {fileID: 2100000, guid: 5c2b3d84f435d5743b5da3e146c99d2b, type: 2}
+  m_DecalMaterial: {fileID: 2100000, guid: 54a278e6f74c4988a8e8d11af7c9a43a, type: 2}
+  m_PostProcessData: {fileID: 11400000, guid: e1b829bd2df826b43a6ef1e8b3b7bd6c, type: 2}
+  m_SpriteLightCookieShader: {fileID: 4800000, guid: 5ec0b3a0f2a80ed4ab1cbd16857a25c7, type: 3}
+  m_FalloffLookup: {fileID: 11400000, guid: 10f1b2993d3c1b34eaaf1be389b3e87c, type: 2}
+  m_ShadowTransparentReceive: 1
+  m_RendererIndexList: 
+  m_RendererDataList:
+  - {fileID: 11400000, guid: a4c6c4e5a0c6481eaa2cd5dfc026b6b0, type: 2}
+  m_DefaultRendererIndex: 0
+  m_UseSRPBatcher: 1
+  m_SupportsDynamicBatching: 0
+  m_MixedLightingSupported: 1
+  m_TerrainDetailMode: 0
+  m_AccurateGbufferNormals: 0
+  m_UseAdaptivePerformance: 0
+  m_ColorGradingLutSize: 32
+  m_ShadowDistance: 50
+  m_ShadowCascadeCount: 1
+  m_Cascade2Split: 0.25
+  m_Cascade3Split: {x: 0.1, y: 0.3}
+  m_Cascade4Split: {x: 0.067, y: 0.2, z: 0.467}
+  m_UseSRGBPostProcessing: 1
+  m_SupportDataDrivenLensFlare: 1
+  m_StoreActionsOptimization: 0
