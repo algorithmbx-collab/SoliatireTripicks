@@ -60,64 +60,6 @@ namespace SolitaireTripicks.Cards
         private Color? originalBackColor;
         private BoxCollider2D boxCollider;
 
-        /// <summary>
-        /// Ensures the card has renderer components assigned, creating simple children when missing.
-        /// Placed near the top of the class so Awake can always find it regardless of script serialization order.
-        /// </summary>
-        private void EnsureRenderers()
-        {
-            if (frontRenderer == null)
-            {
-                frontRenderer = FindRendererOnChild("Front") ?? gameObject.AddComponent<SpriteRenderer>();
-                frontRenderer.sortingOrder = 1;
-            }
-
-            if (backRenderer == null)
-            {
-                backRenderer = FindRendererOnChild("Back");
-                if (backRenderer == null)
-                {
-                    var backObject = new GameObject("Back");
-                    backObject.transform.SetParent(transform);
-                    backObject.transform.localPosition = Vector3.zero;
-                    backObject.transform.localRotation = Quaternion.identity;
-                    backObject.transform.localScale = Vector3.one;
-                    backRenderer = backObject.AddComponent<SpriteRenderer>();
-                }
-
-                backRenderer.sortingOrder = 0;
-            }
-
-            if (frontRenderer != null && backRenderer != null)
-            {
-                backRenderer.sortingLayerID = frontRenderer.sortingLayerID;
-                if (backRenderer.sortingOrder >= frontRenderer.sortingOrder)
-                {
-                    backRenderer.sortingOrder = frontRenderer.sortingOrder - 1;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Ensures a collider exists and matches the currently assigned sprite bounds.
-        /// </summary>
-        private void EnsureCollider()
-        {
-            boxCollider = GetComponent<BoxCollider2D>();
-            if (boxCollider == null)
-            {
-                boxCollider = gameObject.AddComponent<BoxCollider2D>();
-            }
-
-            var referenceRenderer = frontRenderer != null ? frontRenderer : backRenderer;
-            if (referenceRenderer != null && referenceRenderer.sprite != null)
-            {
-                var size = referenceRenderer.sprite.bounds.size;
-                boxCollider.size = size;
-                boxCollider.offset = Vector2.zero;
-            }
-        }
-
         private void Awake()
         {
             EnsureRenderers();
@@ -173,7 +115,6 @@ namespace SolitaireTripicks.Cards
             }
 
             UpdateLabel(CardData);
-            EnsureCollider();
             SetFaceUp(faceUp, instant);
         }
 
@@ -354,12 +295,6 @@ namespace SolitaireTripicks.Cards
                 meshRenderer.sortingLayerID = sortingLayerId;
                 meshRenderer.sortingOrder = sortingOrder;
             }
-        }
-
-        private SpriteRenderer FindRendererOnChild(string childName)
-        {
-            var child = transform.Find(childName);
-            return child != null ? child.GetComponent<SpriteRenderer>() : null;
         }
 
         private void UpdateLabel(CardData data)

@@ -27,10 +27,6 @@ namespace SolitaireTripicks.Cards
         [SerializeField]
         private bool spawnOnStart = true;
 
-        [SerializeField]
-        [Tooltip("Optional override. If not set, the spawner will search for a GameController to wire card interactions.")]
-        private GameController gameController;
-
         private readonly List<SpawnedCard> spawnedCards = new();
         private readonly Dictionary<string, SpawnedCard> spawnedCardsById = new();
 
@@ -40,7 +36,10 @@ namespace SolitaireTripicks.Cards
 
         private void Start()
         {
-            ResolveGameController();
+            if (gameController == null)
+            {
+                gameController = FindObjectOfType<GameController>();
+            }
 
             if (spawnOnStart)
             {
@@ -75,14 +74,6 @@ namespace SolitaireTripicks.Cards
                 }
 
                 view.SetCard(cardData, false, true);
-
-                var interaction = view.GetComponent<CardInteraction>();
-                if (interaction == null)
-                {
-                    interaction = view.gameObject.AddComponent<CardInteraction>();
-                }
-
-                interaction.Initialize(view, ResolveGameController());
 
                 var spawnedCard = new SpawnedCard(node, view);
                 spawnedCards.Add(spawnedCard);
@@ -209,16 +200,6 @@ namespace SolitaireTripicks.Cards
             }
             spawnedCards.Clear();
             spawnedCardsById.Clear();
-        }
-
-        private GameController ResolveGameController()
-        {
-            if (gameController == null)
-            {
-                gameController = FindObjectOfType<GameController>();
-            }
-
-            return gameController;
         }
 
         private void OnDrawGizmos()
