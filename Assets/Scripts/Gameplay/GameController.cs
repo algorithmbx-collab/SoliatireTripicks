@@ -13,6 +13,10 @@ namespace SolitaireTripicks.Cards
 
         public event Action<int> ScoreChanged;
 
+        public event Action<int> StockCountChanged;
+
+        public event Action<CardData> WasteCardChanged;
+
         public event Action GameWon;
 
         public event Action GameLost;
@@ -28,8 +32,19 @@ namespace SolitaireTripicks.Cards
         private readonly Stack<CardData> stockPile = new();
         private CardData wasteTopCard;
         private Deck deck;
+        private bool isPaused;
         private int streak;
         private int score;
+
+        public int StockCount => stockPile.Count;
+
+        public CardData WasteTopCard => wasteTopCard;
+
+        public bool IsPaused => isPaused;
+
+        public int Score => score;
+
+        public int Streak => streak;
 
         private void Start()
         {
@@ -38,6 +53,11 @@ namespace SolitaireTripicks.Cards
 
         public void HandleCardSelected(CardView card)
         {
+            if (isPaused)
+            {
+                return;
+            }
+
             if (card == null)
             {
                 return;
@@ -56,6 +76,33 @@ namespace SolitaireTripicks.Cards
             CheckEndConditions();
 
             CardSelected?.Invoke(card);
+        }
+
+        public void DrawFromStock()
+        {
+            if (isPaused)
+            {
+                return;
+            }
+
+            DrawFromStockToWaste();
+            CheckEndConditions();
+        }
+
+        public void RestartGame()
+        {
+            ResumeGame();
+            StartNewGame();
+        }
+
+        public void PauseGame()
+        {
+            isPaused = true;
+        }
+
+        public void ResumeGame()
+        {
+            isPaused = false;
         }
 
         public bool CanPlay(CardView card)
@@ -94,6 +141,7 @@ namespace SolitaireTripicks.Cards
             wasteTopCard = null;
             streak = 0;
             score = 0;
+            isPaused = false;
 
             deck = Deck.FromResources();
             deck.Shuffle();
@@ -112,6 +160,9 @@ namespace SolitaireTripicks.Cards
             {
                 stockPile.Push(deck.Draw());
             }
+
+            ScoreChanged?.Invoke(score);
+            StreakChanged?.Invoke(streak);
 
             DrawFromStockToWaste();
         }
@@ -197,22 +248,20 @@ namespace SolitaireTripicks.Cards
         {
             if (stockPile.Count == 0)
             {
+                StockCountChanged?.Invoke(stockPile.Count);
+                WasteCardChanged?.Invoke(wasteTopCard);
                 ResetStreak();
                 return;
             }
 
             wasteTopCard = stockPile.Pop();
             UpdateWastePileView();
+            StockCountChanged?.Invoke(stockPile.Count);
             ResetStreak();
         }
 
         private void ResetStreak()
         {
-            if (streak == 0)
-            {
-                return;
-            }
-
             streak = 0;
             StreakChanged?.Invoke(streak);
         }
@@ -221,22 +270,27 @@ namespace SolitaireTripicks.Cards
         {
             if (tableau.Count == 0)
             {
+                isPaused = true;
                 GameWon?.Invoke();
                 return;
             }
 
             if (stockPile.Count == 0 && !HasPlayableMove())
             {
+                isPaused = true;
                 GameLost?.Invoke();
             }
         }
 
         private void UpdateWastePileView()
         {
-            if (wastePileView != null && wasteTopCard != null)
+            if (wastePileView != null)
             {
                 wastePileView.SetCard(wasteTopCard, true, true);
             }
+
+            WasteCardChanged?.Invoke(wasteTopCard);
         }
     }
+}
 }
